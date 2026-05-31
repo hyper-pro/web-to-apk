@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web2APK Premium Builder – Web Edition</title>
+<meta name="description" content="Convert any website URL into a real Android APK instantly. Web Edition of Web2APK Premium Builder by Hyper Pro.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0F1D;--card:#16192E;--border:#2C304E;
+  --blue:#007AFF;--blue-h:#268AFF;--green:#34C759;
+  --red:#FF3B30;--yellow:#FFD60A;--text:#fff;
+  --muted:#8E8E93;--console-bg:#080A12;--input-bg:#0A0B14;
+  --radius:12px;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:24px 16px 60px;
+}
+
+/* ── Header ── */
+.header{width:100%;max-width:700px;display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding:0 4px}
+.header-left h1{
+  font-size:1.2rem;font-weight:800;letter-spacing:.5px;
+  background:linear-gradient(135deg,#fff 40%,var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.credit{font-size:.73rem;color:var(--muted);margin-top:3px}
+.credit a{color:var(--blue);text-decoration:none;font-weight:600;transition:color .2s}
+.credit a:hover{color:var(--blue-h)}
+.badge{
+  font-size:.7rem;font-weight:700;color:var(--blue);
+  background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.3);
+  padding:4px 12px;border-radius:999px;letter-spacing:.4px;white-space:nowrap;
+}
+
+/* ── Card ── */
+.card{
+  width:100%;max-width:700px;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 28px;display:flex;flex-direction:column;gap:18px;
+  box-shadow:0 12px 50px rgba(0,0,0,.55);
+}
+
+/* ── Fields ── */
+.field label{
+  display:block;font-size:.72rem;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px;
+}
+input[type="text"],input[type="url"]{
+  width:100%;background:var(--input-bg);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;
+  font-size:.88rem;padding:11px 14px;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+input[type="text"]:focus,input[type="url"]:focus{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,122,255,.15);
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── Icon ── */
+.icon-row{display:flex;gap:14px;align-items:center}
+.icon-preview{
+  width:58px;height:58px;border-radius:14px;border:1px solid var(--border);
+  background:var(--input-bg);display:flex;align-items:center;justify-content:center;
+  overflow:hidden;flex-shrink:0;transition:border-color .3s;
+}
+.icon-preview img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.icon-placeholder{font-size:1.6rem;opacity:.3}
+.icon-preview.has-img{border-color:var(--blue);box-shadow:0 0 0 2px rgba(0,122,255,.2)}
+.icon-upload-btn{
+  flex:1;padding:11px 14px;background:var(--input-bg);border:1px dashed var(--border);
+  border-radius:8px;color:var(--muted);font-family:'Inter',sans-serif;font-size:.85rem;
+  cursor:pointer;text-align:center;transition:border-color .2s,color .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.icon-upload-btn:hover{border-color:var(--blue);color:var(--blue)}
+#iconFile{display:none}
+
+/* ── Console ── */
+.console-wrap{
+  background:var(--console-bg);border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;height:200px;overflow-y:auto;
+  font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.75;
+}
+.console-wrap::-webkit-scrollbar{width:4px}
+.console-wrap::-webkit-scrollbar-track{background:transparent}
+.console-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.log-line{display:flex;gap:8px;animation:fadeRow .15s ease}
+.log-line.info .pfx{color:var(--blue)}
+.log-line.ok   .pfx{color:var(--green)}
+.log-line.warn .pfx{color:var(--yellow)}
+.log-line.error .pfx{color:var(--red)}
+.log-line .pfx{flex-shrink:0}
+.log-line .msg{color:var(--muted);word-break:break-all}
+@keyframes fadeRow{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* ── Progress ── */
+.progress-wrap{height:4px;background:var(--border);border-radius:999px;overflow:hidden;opacity:0;transition:opacity .3s}
+.progress-wrap.active{opacity:1}
+.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--blue-h));border-radius:999px;transition:width .5s ease}
+
+/* ── Build Button ── */
+#buildBtn{
+  width:100%;padding:15px;background:var(--blue);color:#fff;
+  font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.5px;
+  border:none;border-radius:10px;cursor:pointer;
+  transition:background .2s,transform .1s,box-shadow .2s;position:relative;overflow:hidden;
+}
+#buildBtn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent);pointer-events:none}
+#buildBtn:hover:not(:disabled){background:var(--blue-h);box-shadow:0 4px 24px rgba(0,122,255,.45);transform:translateY(-1px)}
+#buildBtn:active:not(:disabled){transform:translateY(0)}
+#buildBtn:disabled{background:var(--border);cursor:not-allowed;box-shadow:none}
+
+/* ── Download Banner ── */
+#downloadSection{display:none;animation:fadeIn .4s ease}
+#downloadSection.show{display:block}
+.success-banner{
+  background:rgba(52,199,89,.07);border:1px solid rgba(52,199,89,.3);
+  border-radius:10px;padding:20px;text-align:center;
+}
+.success-banner .s-icon{font-size:2.2rem;margin-bottom:6px}
+.success-banner h3{color:var(--green);font-size:1rem;font-weight:700}
+.success-banner p{color:var(--muted);font-size:.8rem;margin-top:4px}
+#downloadBtn{
+  display:inline-flex;align-items:center;gap:8px;margin-top:16px;
+  padding:12px 30px;background:var(--green);color:#000;
+  font-family:'Inter',sans-serif;font-weight:700;font-size:.9rem;
+  border:none;border-radius:8px;cursor:pointer;text-decoration:none;
+  transition:background .2s,transform .1s;
+}
+#downloadBtn:hover{background:#2db34e;transform:translateY(-1px)}
+
+/* ── Error Banner ── */
+#errorSection{display:none;animation:fadeIn .4s ease}
+#errorSection.show{display:block}
+.error-banner{
+  background:rgba(255,59,48,.07);border:1px solid rgba(255,59,48,.3);
+  border-radius:10px;padding:16px 20px;
+}
+.error-banner h3{color:var(--red);font-size:.9rem;font-weight:700;margin-bottom:4px}
+.error-banner p{color:var(--muted);font-size:.8rem}
+
+/* ── Toast ── */
+#toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#1e2140;border:1px solid var(--border);color:var(--text);
+  font-size:.84rem;font-weight:500;padding:12px 22px;border-radius:999px;
+  box-shadow:0 8px 30px rgba(0,0,0,.5);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s;
+  opacity:0;pointer-events:none;z-index:999;white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(max-width:520px){.row2{grid-template-columns:1fr}.card{padding:22px 16px}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <h1>WEB2APK PREMIUM BUILDER</h1>
+    <p class="credit">developed by <a href="https://sithula-vikasitha.github.io/Hyper-Pro/" target="_blank" rel="noopener">Hyper Pro</a></p>
+  </div>
+  <span class="badge">🌐 Web Edition</span>
+</header>
+
+<main class="card">
+
+  <!-- URL -->
+  <div class="field">
+    <label for="webUrl">Website URL</label>
+    <input type="url" id="webUrl" placeholder="https://example.com" autocomplete="off" spellcheck="false">
+  </div>
+
+  <!-- App Name + Package -->
+  <div class="row2">
+    <div class="field">
+      <label for="appName">App Name</label>
+      <input type="text" id="appName" placeholder="My WebView App" value="My WebView App">
+    </div>
+    <div class="field">
+      <label for="pkgName">Package ID</label>
+      <input type="text" id="pkgName" placeholder="com.web2apk.app" value="com.web2apk.mywebviewapp">
+    </div>
+  </div>
+
+  <!-- Icon -->
+  <div class="field">
+    <label>App Icon (.png / .jpg)</label>
+    <div class="icon-row">
+      <div class="icon-preview" id="iconPreview">
+        <span class="icon-placeholder">🖼️</span>
+      </div>
+      <div class="icon-upload-btn" id="iconUploadBtn" onclick="document.getElementById('iconFile').click()">
+        <span>📂</span><span id="iconLabel">Click to select icon image</span>
+      </div>
+      <input type="file" id="iconFile" accept=".png,.jpg,.jpeg">
+    </div>
+  </div>
+
+  <!-- Console -->
+  <div class="field">
+    <label>Compilation Output Console</label>
+    <div class="console-wrap" id="console"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Build -->
+  <button id="buildBtn" onclick="startBuild()">⚡ GENERATE ANDROID APK</button>
+
+  <!-- Download -->
+  <div id="downloadSection">
+    <div class="success-banner">
+      <div class="s-icon">🎉</div>
+      <h3>APK Built Successfully!</h3>
+      <p id="apkSizeTxt">Your signed Android APK is ready to download.</p>
+    </div>
+    <div style="text-align:center">
+      <a id="downloadBtn" href="#" download>⬇ Download APK</a>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="errorSection">
+    <div class="error-banner">
+      <h3>⚠️ Build Failed</h3>
+      <p id="errorMsg">An error occurred during compilation.</p>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+const appNameEl  = document.getElementById('appName');
+const pkgNameEl  = document.getElementById('pkgName');
+const urlEl      = document.getElementById('webUrl');
+const iconFileEl = document.getElementById('iconFile');
+const iconPrev   = document.getElementById('iconPreview');
+const iconLabel  = document.getElementById('iconLabel');
+const consoleEl  = document.getElementById('console');
+const buildBtn   = document.getElementById('buildBtn');
+const progWrap   = document.getElementById('progressWrap');
+const progBar    = document.getElementById('progressBar');
+const dlSection  = document.getElementById('downloadSection');
+const errSection = document.getElementById('errorSection');
+const dlBtn      = document.getElementById('downloadBtn');
+
+let progress = 0;
+const STEPS = 14; // approx log steps
+
+// Auto-slug package
+appNameEl.addEventListener('input', () => {
+  const slug = appNameEl.value.replace(/[^a-zA-Z0-9]/g,'').toLowerCase() || 'app';
+  pkgNameEl.value = `com.web2apk.${slug}`;
+});
+
+// Icon preview
+iconFileEl.addEventListener('change', () => {
+  const file = iconFileEl.files[0];
+  if (!file) return;
+  iconLabel.textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    iconPrev.innerHTML = `<img src="${e.target.result}" alt="icon">`;
+    iconPrev.classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+});
+
+function log(msg, type='info') {
+  const pfxMap = {info:'[*]', ok:'[+]', warn:'[!]', error:'[✗]'};
+  const line = document.createElement('div');
+  line.className = `log-line ${type}`;
+  line.innerHTML = `<span class="pfx">${pfxMap[type]}</span><span class="msg">${msg}</span>`;
+  consoleEl.appendChild(line);
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+  // advance progress
+  progress = Math.min(progress + (90 / STEPS), 90);
+  setProgress(progress);
+}
+
+function setProgress(p) {
+  progWrap.classList.add('active');
+  progBar.style.width = p + '%';
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function validate() {
+  const url  = urlEl.value.trim();
+  const name = appNameEl.value.trim();
+  const pkg  = pkgNameEl.value.trim();
+  if (!url || url === 'https://' || url === 'http://') { toast('⚠️ Enter a valid website URL'); return false; }
+  if (!/^https?:\/\//i.test(url)) { toast('⚠️ URL must start with http:// or https://'); return false; }
+  if (!name)  { toast('⚠️ App Name is required'); return false; }
+  if (!/^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(pkg)) {
+    toast('⚠️ Invalid Package ID (e.g. com.example.app)'); return false;
+  }
+  if (!iconFileEl.files[0]) { toast('⚠️ Please select an App Icon'); return false; }
+  return true;
+}
+
+async function startBuild() {
+  if (!validate()) return;
+
+  // Reset UI
+  consoleEl.innerHTML = '';
+  dlSection.classList.remove('show');
+  errSection.classList.remove('show');
+  buildBtn.disabled = true;
+  buildBtn.textContent = '⏳ BUILDING APK...';
+  progress = 0;
+  setProgress(0);
+
+  // Build FormData
+  const fd = new FormData();
+  fd.append('url',      urlEl.value.trim());
+  fd.append('app_name', appNameEl.value.trim());
+  fd.append('pkg_name', pkgNameEl.value.trim());
+  fd.append('icon',     iconFileEl.files[0]);
+
+  // POST /api/build
+  let jobId;
+  try {
+    const resp = await fetch('/api/build', { method: 'POST', body: fd });
+    const data = await resp.json();
+    if (!resp.ok) { showError(data.error || 'Build request failed'); return; }
+    jobId = data.job_id;
+  } catch(e) {
+    showError('Cannot connect to server. Make sure server.py is running on port 5050.');
+    return;
+  }
+
+  // Stream logs via SSE
+  const es = new EventSource(`/api/logs/${jobId}`);
+
+  es.onmessage = (e) => {
+    const item = JSON.parse(e.data);
+
+    if (item.type === 'done') {
+      es.close();
+      if (item.success) {
+        setProgress(100);
+        buildBtn.disabled = false;
+        buildBtn.textContent = '⚡ GENERATE ANDROID APK';
+        dlBtn.href = `/api/download/${jobId}`;
+        dlSection.classList.add('show');
+        toast('✅ APK built successfully!');
+      } else {
+        buildDone(false);
+      }
+      return;
+    }
+
+    if (item.type === 'timeout') { es.close(); buildDone(false, 'Build timed out.'); return; }
+
+    log(item.msg, item.type || 'info');
+  };
+
+  es.onerror = () => {
+    es.close();
+    showError('Lost connection to build server.');
+  };
+}
+
+function buildDone(success, errMsg) {
+  buildBtn.disabled = false;
+  buildBtn.textContent = '⚡ GENERATE ANDROID APK';
+  if (!success) {
+    showError(errMsg || 'Build failed. Check console for details.');
+  }
+}
+
+function showError(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+  errSection.classList.add('show');
+  toast('❌ ' + msg.substring(0, 60));
+  buildBtn.disabled = false;
+  buildBtn.textContent = '⚡ GENERATE ANDROID APK';
+}
+
+// Init
+log('--- Waiting to start build ---', 'info');
+</script>
+</body>
+</html>
