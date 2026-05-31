@@ -3,7 +3,7 @@ FROM python:3.11-slim
 
 # Install system dependencies, including OpenJDK Java Runtime (required for Apktool)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openjdk-17-jre-headless \
+    openjdk-21-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container
